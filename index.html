@@ -53,6 +53,8 @@ Your browser does not support the audio element.
 <div id="surveyPopup" class="popup hidden">
 <div class="popup-box glass">
 <h3>Survey</h3>
+<label>Your Name:</label>
+<input type="text" id="userName" placeholder="Enter your name" />
 <label>Skill Level:</label>
 <select id="level">
 <option>Beginner</option>
@@ -247,6 +249,13 @@ Your browser does not support the audio element.
   <div class="product synth" data-price="9000" data-brand="Novation"><img src="instruments/novation_bass2.jpg" alt="Novation Bass Station II"><h3>Novation Bass Station II</h3><p>25-key analog synthesizer focused on bass.</p><button onclick="addToCart('Novation Bass Station II', 9000)">Add to Cart</button></div>
 </div>
 </section>
+
+<!-- MINI CART PREVIEW -->
+<div id="miniCartPreview" class="mini-cart hidden">
+  <h4>Mini Cart</h4>
+  <div id="miniCartItems"></div>
+  <p class="mini-cart-total">Total: ₱0</p>
+</div>
 
 <!-- CART -->
 <section id="cart" class="glass">
