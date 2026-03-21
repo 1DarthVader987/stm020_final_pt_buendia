@@ -104,12 +104,73 @@ nav {
   display: flex;
   justify-content: center;
   gap: 15px;
+  flex-wrap: wrap;
   padding: 10px;
   background: rgba(255,255,255,0.05);
   position: fixed;
   top: 50px;
   width: 100%;
   z-index: 100;
+}
+
+.mini-cart {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 240px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  border: 1px solid #F4D35E;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  z-index: 150;
+  transform: translateY(10px);
+  transition: transform 0.25s ease;
+}
+
+.mini-cart.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+.mini-cart h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.mini-cart-item {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.mini-cart-total {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.product {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  transform-origin: center;
+}
+
+.product:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+}
+
+/* Background animation */
+body {
+  animation: gradientBackground 20s ease infinite;
+}
+
+@keyframes gradientBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 nav a {

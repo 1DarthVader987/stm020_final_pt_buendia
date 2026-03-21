@@ -71,21 +71,23 @@ function goBack() {
 }
 
 function applySurvey() {
+  const name = document.getElementById('userName').value.trim() || 'Music Lover';
   const level = document.getElementById('level').value;
   const budget = document.getElementById('budget').value;
   const category = document.getElementById('category').value;
   const genre = document.getElementById('genre').value;
   const instrument = document.getElementById('instrument').value;
   
-  // Store survey data
-  surveyData = {level, budget, category, genre, instrument};
-  
-  const recommendation = `Based on your ${level} level and ${budget} budget, we recommend items from the ${category} category!`;
+  // Store survey data locally for persistence
+  surveyData = {name, level, budget, category, genre, instrument};
+  localStorage.setItem('crescendoSurvey', JSON.stringify(surveyData));
+
+  const recommendation = `Hi ${name}! Based on your ${level} level, ${genre} taste, and ${budget} budget, we recommend instruments from the ${category} category.`;
   document.getElementById('recommendation').textContent = recommendation;
   document.getElementById('surveyPopup').classList.add('hidden');
   
   // Filter products based on survey answers
-  if(category !== 'All') {
+  if(category && category !== 'All') {
     currentFilter = category.toLowerCase();
   } else {
     currentFilter = 'all';
@@ -95,10 +97,78 @@ function applySurvey() {
   jumpTo('shop');
 }
 
+function loadPersonalization() {
+  const stored = JSON.parse(localStorage.getItem('crescendoSurvey') || '{}');
+  if (stored.name) {
+    document.getElementById('userName').value = stored.name;
+    document.getElementById('recommendation').textContent = `Hi ${stored.name}! Here are instruments tailored to your style.`;
+  }
+  if (stored.level) document.getElementById('level').value = stored.level;
+  if (stored.budget) document.getElementById('budget').value = stored.budget;
+  if (stored.category) document.getElementById('category').value = stored.category;
+  if (stored.genre) document.getElementById('genre').value = stored.genre;
+  if (stored.instrument) document.getElementById('instrument').value = stored.instrument;
+  
+  if (stored.category && stored.category !== 'All') {
+    currentFilter = stored.category.toLowerCase();
+    applyFilters();
+  }
+}
+
 function addToCart(name, price) {
   cart.push({name, price});
   updateCart();
-  alert(name + ' added to cart!');
+  flyToCart(name);
+  const status = document.getElementById('musicStatus');
+  if (status) status.textContent = `${name} added to cart!`;
+}
+
+function updateMiniCartPreview() {
+  const preview = document.getElementById('miniCartPreview');
+  const itemsContainer = document.getElementById('miniCartItems');
+  const totalEl = document.querySelector('.mini-cart-total');
+  if (!preview || !itemsContainer || !totalEl) return;
+  
+  itemsContainer.innerHTML = '';
+  let total = 0;
+  cart.forEach(item => {
+    const entry = document.createElement('div');
+    entry.className = 'mini-cart-item';
+    entry.textContent = `${item.name} - ₱${item.price}`;
+    itemsContainer.appendChild(entry);
+    total += item.price;
+  });
+  totalEl.textContent = `Total: ₱${total}`;
+  preview.classList.toggle('hidden', cart.length === 0);
+}
+
+function flyToCart(productName) {
+  const product = Array.from(document.querySelectorAll('.product')).find(p => p.querySelector('h3').textContent === productName);
+  if (!product) return;
+  const img = product.querySelector('img');
+  if (!img) return;
+
+  const flying = img.cloneNode();
+  flying.style.position = 'fixed';
+  const rect = img.getBoundingClientRect();
+  flying.style.left = `${rect.left}px`;
+  flying.style.top = `${rect.top}px`;
+  flying.style.width = `${rect.width}px`;
+  flying.style.height = `${rect.height}px`;
+  flying.style.zIndex = 1000;
+  flying.style.transition = 'all 0.8s ease-in-out';
+  document.body.appendChild(flying);
+
+  const target = document.getElementById('darkModeToggle')?.getBoundingClientRect() || {left: window.innerWidth - 40, top: 80};
+  requestAnimationFrame(() => {
+    flying.style.left = `${target.left}px`;
+    flying.style.top = `${target.top}px`;
+    flying.style.width = '30px';
+    flying.style.height = '30px';
+    flying.style.opacity = '0.3';
+  });
+
+  setTimeout(() => flying.remove(), 900);
 }
 
 function updateCart() {
@@ -140,6 +210,7 @@ function updateCart() {
   });
   
   document.getElementById('total').textContent = `Total: ₱${total}`;
+  updateMiniCartPreview();
 }
 
 function removeFromCart(index) {
@@ -399,6 +470,25 @@ window.addEventListener('load', () => {
   document.querySelectorAll('button, nav a').forEach(element => {
     element.addEventListener('mouseenter', playHoverSound);
   });
+
+  // Instrument sample on product hover
+  const hoverSynth = new (window.AudioContext || window.webkitAudioContext)();
+  document.querySelectorAll('.product').forEach(product => {
+    product.addEventListener('mouseenter', () => {
+      const osc = hoverSynth.createOscillator();
+      const gain = hoverSynth.createGain();
+      osc.type = 'triangle';
+      osc.frequency.value = 220 + Math.random() * 110;
+      gain.gain.setValueAtTime(0.05, hoverSynth.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, hoverSynth.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(hoverSynth.destination);
+      osc.start();
+      osc.stop(hoverSynth.currentTime + 0.35);
+    });
+  });
+  
+  loadPersonalization();
   
   // Background image cycling
   const backgrounds = ['background1.jpg', 'background2.jpg', 'background3.jpg', 'background4.jpg'];
